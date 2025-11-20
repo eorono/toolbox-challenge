@@ -1,20 +1,19 @@
 const express = require('express')
 const cors = require('cors')
+const dataRoutes = require('./routes/dataRoutes') // <--- Importamos rutas
+
 const app = express()
 const PORT = 3000
 
-// Middlewares
 app.use(express.json())
-app.use(cors()) // Útil para cuando conectemos el Frontend React
+app.use(cors())
 
-// Ruta de prueba básica (Health Check)
-app.get('/', (req, res) => {
-    res.json({ message: 'API is running' })
-})
+// Montamos las rutas bajo el prefijo /files
+// El requisito pide el endpoint GET /files/data
+app.use('/files', dataRoutes) // <--- Usamos rutas
 
-// Inicio del servidor
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
 })
 
-module.exports = app // Exportamos para poder hacer tests después
+module.exports = app
