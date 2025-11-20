@@ -21,19 +21,21 @@ const client = axios.create({
 const parseLine = (rawLine) => {
     const parts = rawLine.split(',')
 
-    // Validación básica: El formato estricto pide 4 columnas [cite: 72-76]
     if (parts.length !== 4) return null
 
     const [fileName, text, number, hex] = parts
 
-    // Verificación extra: Aseguramos que los campos no estén vacíos
-    // y evitamos procesar la línea del header ("file,text,number,hex")
     if (!fileName || !text || !number || !hex) return null
-    if (number === 'number') return null // Detecta si es la cabecera
+
+    // Validamos que el número sea realmente un número
+    const convertedNumber = Number(number)
+
+    // Si es NaN (Not a Number), descartamos la línea completa
+    if (isNaN(convertedNumber)) return null
 
     return {
         text: text.trim(),
-        number: Number(number), // Convertimos a número como pide el tipo de dato
+        number: convertedNumber,
         hex: hex.trim()
     }
 }
