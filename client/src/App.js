@@ -10,6 +10,7 @@ import axios from 'axios'
 
 function App() {
   const [files, setFiles] = useState([])
+  const [fileList, setFileList] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchText, setSearchText] = useState('')
@@ -17,6 +18,7 @@ function App() {
   // Hook Effect para cargar los datos al montar el componente 
   useEffect(() => {
     fetchData()
+    fetchFileList()
   }, [])
 
   const fetchData = async (fileName = null) => {
@@ -44,10 +46,24 @@ function App() {
     }
   }
 
+  const fetchFileList = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/files/list')
+      setFileList(response.data)
+    } catch (err) {
+      console.error('Error fetching file list:', err)
+    }
+  }
+
   // Manejador del submit del formulario
   const handleSearch = (e) => {
     e.preventDefault()
     fetchData(searchText)
+  }
+
+  const handleReset = () => {
+    setSearchText('')
+    fetchData()
   }
 
   return (
@@ -56,20 +72,37 @@ function App() {
         <h1 className="m-0 h3">React Test App</h1>
       </div>
 
-      {/* --- Barra de Búsqueda --- */}
       <Form onSubmit={handleSearch} className="mb-4">
         <InputGroup>
+          {/* Input de Texto con Autocompletado */}
           <Form.Control
-            placeholder="Search by file name (e.g., test2.csv)"
+            placeholder="Search by file name..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
+            list="files-options"
           />
+
+          {/* Botón de búsqueda manual */}
           <Button variant="primary" type="submit" disabled={loading}>
             Search
           </Button>
+
+          <Button variant="outline-secondary" onClick={handleReset} disabled={loading}>
+            Reset
+          </Button>
         </InputGroup>
+
+        <Form.Text className="text-muted">
+          Empieza a escribir para ver sugerencias del servidor.
+        </Form.Text>
+
+        {/* Esta es la lista invisible que el navegador usa para sugerir */}
+        <datalist id="files-options">
+          {fileList.map((fileName, index) => (
+            <option key={index} value={fileName} />
+          ))}
+        </datalist>
       </Form>
-      {/* ------------------------- */}
 
       {error && <Alert variant="danger">{error}</Alert>}
 
