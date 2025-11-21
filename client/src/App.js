@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Container from 'react-bootstrap/Container'
 import Table from 'react-bootstrap/Table'
 import Spinner from 'react-bootstrap/Spinner'
@@ -6,64 +6,39 @@ import Alert from 'react-bootstrap/Alert'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
-import axios from 'axios'
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchFilesData, fetchFileList, setSelectedFile } from './store/dataSlice'
 
 function App() {
-  const [files, setFiles] = useState([])
-  const [fileList, setFileList] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [searchText, setSearchText] = useState('')
 
-  // Hook Effect para cargar los datos al montar el componente 
+  const dispatch = useDispatch()
+
+  // Extraemos el estado desde Redux
+  const {
+    files,
+    fileList,
+    loading,
+    error,
+    selectedFile
+  } = useSelector((state) => state.data)
+
   useEffect(() => {
-    fetchData()
-    fetchFileList()
-  }, [])
+    // Disparamos las acciones al iniciar
+    dispatch(fetchFilesData())
+    dispatch(fetchFileList())
+  }, [dispatch])
 
-  const fetchData = async (fileName = null) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const options = {
-        params: {}
-      }
-
-      // Solo agregamos el parámetro si existe texto
-      if (fileName) {
-        options.params.fileName = fileName
-      }
-
-      const response = await axios.get('http://localhost:3000/files/data', options)
-
-      setFiles(response.data)
-    } catch (err) {
-      setError('Error fetching data. Make sure the API is running on port 3000.')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchFileList = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/files/list')
-      setFileList(response.data)
-    } catch (err) {
-      console.error('Error fetching file list:', err)
-    }
-  }
-
-  // Manejador del submit del formulario
   const handleSearch = (e) => {
     e.preventDefault()
-    fetchData(searchText)
+    // Disparamos la acción asíncrona con el filtro actual
+    dispatch(fetchFilesData(selectedFile))
   }
 
   const handleReset = () => {
-    setSearchText('')
-    fetchData()
+    // Limpiamos el input en el estado global
+    dispatch(setSelectedFile(''))
+    // Recargamos la tabla sin filtros
+    dispatch(fetchFilesData())
   }
 
   return (
@@ -77,8 +52,8 @@ function App() {
           {/* Input de Texto con Autocompletado */}
           <Form.Control
             placeholder="Search by file name..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={selectedFile}
+            onChange={(e) => dispatch(setSelectedFile(e.target.value))}
             list="files-options"
           />
 
