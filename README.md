@@ -38,7 +38,7 @@ docker-compose up --build
     - API: http://localhost:3000
 
 
-⚙️ Ejecución Manual (Sin Docker)
+## ⚙️ Ejecución Manual (Sin Docker)
 
 ### Si prefieres correrlo localmente, necesitarás gestionar las versiones de Node (ej. usando nvm).
 
