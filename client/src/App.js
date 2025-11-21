@@ -3,23 +3,38 @@ import Container from 'react-bootstrap/Container'
 import Table from 'react-bootstrap/Table'
 import Spinner from 'react-bootstrap/Spinner'
 import Alert from 'react-bootstrap/Alert'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+import InputGroup from 'react-bootstrap/InputGroup'
 import axios from 'axios'
 
 function App() {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [searchText, setSearchText] = useState('')
 
   // Hook Effect para cargar los datos al montar el componente 
   useEffect(() => {
     fetchData()
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (fileName = null) => {
     try {
       setLoading(true)
-      // Gracias al proxy en package.json, no necesitamos poner http://localhost:3000
-      const response = await axios.get('http://localhost:3000/files/data')
+      setError(null)
+
+      const options = {
+        params: {}
+      }
+
+      // Solo agregamos el parámetro si existe texto
+      if (fileName) {
+        options.params.fileName = fileName
+      }
+
+      const response = await axios.get('http://localhost:3000/files/data', options)
+
       setFiles(response.data)
     } catch (err) {
       setError('Error fetching data. Make sure the API is running on port 3000.')
@@ -29,9 +44,32 @@ function App() {
     }
   }
 
+  // Manejador del submit del formulario
+  const handleSearch = (e) => {
+    e.preventDefault()
+    fetchData(searchText)
+  }
+
   return (
     <Container className="mt-5">
-      <h1 className="mb-4 text-white bg-dark p-3 rounded">React Test App</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4 bg-dark p-3 rounded text-white">
+        <h1 className="m-0 h3">React Test App</h1>
+      </div>
+
+      {/* --- Barra de Búsqueda --- */}
+      <Form onSubmit={handleSearch} className="mb-4">
+        <InputGroup>
+          <Form.Control
+            placeholder="Search by file name (e.g., test2.csv)"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <Button variant="primary" type="submit" disabled={loading}>
+            Search
+          </Button>
+        </InputGroup>
+      </Form>
+      {/* ------------------------- */}
 
       {error && <Alert variant="danger">{error}</Alert>}
 
