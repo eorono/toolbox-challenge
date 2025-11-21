@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # --- Servicio API (Backend) ---
+  server:
+    build: ./server
+    container_name: toolbox-api
+    ports:
+      - "3000:3000" # Mapea puerto 3000 de tu PC al 3000 del contenedor
+    volumes:
+      - ./server/src:/app/src # "Hot Reload": Si cambias código en Windows, se actualiza en Docker
+    environment:
+      - PORT=3000
+
+  # --- Servicio React (Frontend) ---
+  client:
+    build: ./client
+    container_name: toolbox-client
+    ports:
+      - "3001:3001" # Mapea puerto 3001 de tu PC al 3001 del contenedor
+    stdin_open: true # Necesario para que React no se cierre inmediatamente
+    tty: true
+    environment:
+      - PORT=3001
+      # Desactivamos la comprobación de host para evitar problemas de "Invalid Host Header"
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true 
+    volumes:
+      - ./client/src:/app/src # Hot Reload para React
+    depends_on:
+      - server # Espera a que el server arranque primero
