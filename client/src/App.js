@@ -19,7 +19,7 @@ function App() {
     try {
       setLoading(true)
       // Gracias al proxy en package.json, no necesitamos poner http://localhost:3000
-      const response = await axios.get('/files/data')
+      const response = await axios.get('http://localhost:3000/files/data')
       setFiles(response.data)
     } catch (err) {
       setError('Error fetching data. Make sure the API is running on port 3000.')
